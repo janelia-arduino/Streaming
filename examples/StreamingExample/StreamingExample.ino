@@ -35,6 +35,7 @@ void loop()
   Serial << _FMT("Format strings for stuff like dates and times %/%/% %:%:%", 
     _WIDTHZ(day, 2), _WIDTHZ(month, 2), year,
     _WIDTHZ(hour,2), _WIDTHZ(minute, 2), _WIDTHZ(second,2)) << endl;
+  Serial << _FMT(F("To reduce your % size, these % can be in %"), F("sketch"), F("constants"), F("PROGMEM")) << endl;
   Serial << endl;
 
   delay(LOOP_DELAY);
