@@ -30,6 +30,9 @@
 
   3.  _WIDTH & _WIDTHZ added to allow width printing with space padding
       and zero padding for numerics
+
+  4.  Simple _FMT mechanism ala printf, but without the typeunsafetyness 
+      and no internal buffers for replaceable stream printing
 */
 
 #ifndef ARDUINO_STREAMING
