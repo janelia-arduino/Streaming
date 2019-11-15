@@ -19,8 +19,8 @@
 
   [[http://arduiniana.org/libraries/streaming/]]
 
-* Examples
-'''
+** Examples
+```
   Serial << "This is an example of the new streaming" << endl;
   Serial << "library.  This allows you to print variables" << endl;
   Serial << "and strings without having to type line after" << endl;
@@ -44,4 +44,4 @@
   Serial << endl;
 
   delay(LOOP_DELAY);
-'''
+```
