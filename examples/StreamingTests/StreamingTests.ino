@@ -85,6 +85,7 @@ void loop()
     }
     Assert.reset();
 
+    const char abc[] = "abc";
     //
     //  Start by testing that simple types all function correctly
     //  using the generic template
@@ -96,7 +97,10 @@ void loop()
     Assert << B1000 == F("8");
     Assert << 1.0 == F("1.00");
     Assert << 1.005 == F("1.00");
+    Assert << -10.23 == F("-10.23");
     Assert << "abc" == F("abc");
+    Assert << abc == F("abc");
+    Assert << abc == abc;
     Assert << F("abc") == F("abc");
     Assert << String("string") == F("string");
     Assert << PrintableTest() == F("printed");
@@ -125,41 +129,53 @@ void loop()
     Assert << _DEC((int32_t)1) == F("1");
     Assert << _DEC((int32_t)-1) == F("-1");
     Assert << _DEC((uint32_t)1) == F("1");
-    //Assert << _DEC((uint32_t)-1) == F("4294967295");
+    Assert << _DEC((uint32_t)-1) == F("4294967295");
     Assert << (uint32_t)4294967295 == F("4294967295");
 
     Assert << _HEX(15) == F("F");
-    //Assert << _HEX(-1) == F("FF");
-    //Assert << _HEX((int8_t)-1) == F("FF");
-    //Assert << _HEX((int16_t)-1) == F("FFFF");
-    //Assert << _HEX((int32_t)-1) == F("FFFFFFFF");
     Assert << _OCT(15) == F("17");
     Assert << _BIN(15) == F("1111");
-    //Assert << _BIN(-1) == F("11111111");
-    //Assert << _BIN((int8_t)-1) == F("11111111");
-    //Assert << _BIN((int16_t)-1) == F("11111111");
-    Assert << _BIN((int32_t)-1) == F("11111111111111111111111111111111");
     Assert << _BYTE(64) == F("@");
 
     //
     //  _FLOAT
     //
     double v = 1.23456789012345;
-    Assert << _FLOAT(v, 1) == "1.2";
-    Assert << _FLOAT(v, 2) == "1.23";
-    Assert << _FLOAT(v, 3) == "1.235";
-    Assert << _FLOAT(v, 4) == "1.2346";
-    Assert << _FLOAT(v, 5) == "1.23457";
-    Assert << _FLOAT(v, 6) == "1.234568";
+    Assert << _FLOAT(v, 1) == F("1.2");
+    Assert << _FLOAT(v, 2) == F("1.23");
+    Assert << _FLOAT(v, 3) == F("1.235");
+    Assert << _FLOAT(v, 4) == F("1.2346");
+    Assert << _FLOAT(v, 5) == F("1.23457");
+    Assert << _FLOAT(v, 6) == F("1.234568");
 
-    Assert << _FLOAT(1.7649E22, 5) == "ovf";    // This really needs work!
+    Assert << _FLOAT(1.7649E22, 5) == F("ovf");    // This really needs work!
 
     //
     //  endl
     //
     Assert << 1 << endl == F("1\r\n");
 
+    //
+    //  Padding helper
+    //
 
+    Assert << _PAD(10,' ') == F("          ");
+    Assert << _PAD(4, '0') == F("0000");
+    Assert << _PAD(20, '=') == F("====================");
+
+
+    //
+    //  Width streaming
+    //
+
+    Assert << _WIDTH(1, 5) == F("    1");
+    Assert << _WIDTH(-1, 5) == F("   -1");
+    Assert << _WIDTHZ(1, 5) == F("00001");
+    Assert << _WIDTHZ(128,5) == F("00128");
+    Assert << _WIDTHZ(_HEX(128), 5) == F("00080");
+    Assert << _WIDTH(abc, 5) == F("  abc");
+    Assert << _WIDTH("one", 5) == F("  one");
+    Assert << _WIDTH(F("one"),5) == F("  one");
 
     //
     //  Make sure that all the stream operators return the stream
@@ -167,22 +183,15 @@ void loop()
     //
 
     Assert
-        << (int8_t)1            // Generic
-        << _BYTE(64)            // _BYTE_CODE
-        << _HEX(15)             // _BASED
-        << _FLOAT(1,0)          // _FLOAT
-
+        << (int8_t)1            // Generic template
+        << _BYTE(50)            // _BYTE_CODE
+        << _HEX(3)              // _BASED
+        << _FLOAT(4,0)          // _FLOAT
+        << _PAD(1,'5')          // Padding
 
         << endl
 
-        == F("1@F1\r\n");
-
-
-
-
-
-
-
+        == F("12345\r\n");
 
     //
     // Final report
