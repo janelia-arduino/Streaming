@@ -30,7 +30,6 @@
 
   3.  _WIDTH & _WIDTHZ added to allow width printing with space padding
       and zero padding for numerics
-
 */
 
 #ifndef ARDUINO_STREAMING
@@ -133,16 +132,16 @@ inline Print &operator <<(Print &obj, _EndLineCode arg)
 //    Serial << _PAD(4, '0');   // Will output 4 zeros
 struct _PAD
 {
-    int8_t width;
-    char   chr;
-    _PAD(int8_t w, char c) : width(w), chr(c) {}
+  int8_t width;
+  char   chr;
+  _PAD(int8_t w, char c) : width(w), chr(c) {}
 };
 
 inline Print &operator <<(Print& stm, const _PAD &arg)
 {
-    for(int8_t i = 0; i < arg.width; i++)
-        stm.print(arg.chr);
-    return stm;
+  for(int8_t i = 0; i < arg.width; i++)
+    stm.print(arg.chr);
+  return stm;
 }
 
 // Specialization for width printing
@@ -164,26 +163,26 @@ inline Print &operator <<(Print& stm, const _PAD &arg)
 template<typename T, int8_t WIDTH, char PAD = ' '>
 struct __WIDTH
 {
-    const T& val;
-    __WIDTH(const T& v) : val(v) {}
+  const T& val;
+  __WIDTH(const T& v) : val(v) {}
 };
 
 //  Count digits in an integer of specific base
 template<typename T>
 inline uint8_t digits(T v, int8_t base = 10)
 {
-    uint8_t digits = 0;
-    if ( std::is_signed<T>::value )
-    {
-        if ( v < 0 )
-          digits++;
-    }
-    do
-    {
-        v /= base;
-        digits++;
-    } while( v > 0 );
-    return digits;
+  uint8_t digits = 0;
+  if ( std::is_signed<T>::value )
+  {
+    if ( v < 0 )
+      digits++;
+  }
+  do
+  {
+    v /= base;
+      digits++;
+  } while( v > 0 );
+  return digits;
 }
 
 // Generic get the width of a value in base 10
@@ -210,5 +209,114 @@ inline uint8_t get_value_width(_BASED<T> b)
 template<typename T, int8_t WIDTH, char PAD>
 inline Print &operator <<(Print &stm, const __WIDTH<T, WIDTH, PAD> &arg)
 { stm << _PAD(WIDTH-get_value_width(arg.val), PAD); stm << arg.val; return stm; }
+
+
+// Specialization for replacement formatting
+//
+//  Designed to be similar to printf that everyone knows and loves/hates. But without
+//  the internal buffers and type agnosticism. This version only has placeholders in
+//  the format string, the actual values are supplied using the stream safe operators
+//  defined in this library.
+//
+//  Use like this:
+//
+//      Serial << FMT(F("Replace % with %"), 1, 2 )
+//      Serial << FMT("Time is %:%:%", _WIDTHZ(hours,2), _WIDTHZ(minutes,2), _WIDTHZ(seconds,2))
+//      Serial << FMT("Your score is %\\%", score);   // Note the \\ to escape the % sign
+
+// Ok, hold your hats. This is a foray into C++11's variadic template engine ...
+
+inline char get_next_format_char(const char *& format_string)
+{
+  char format_char = *format_string;
+  if ( format_char > 0 ) format_string++;
+  return format_char;
+}
+
+inline char get_next_format_char(const __FlashStringHelper*& format_string)
+{
+  char format_char = pgm_read_byte(format_string);
+  if ( format_char > 0 ) format_string = reinterpret_cast<const __FlashStringHelper*>(reinterpret_cast<const char *>(format_string)+1);
+  return format_char;
+}
+
+template<typename Ft>
+inline bool check_backslash(char& format_char, Ft& format_string)
+{
+  if ( format_char == '\\')
+  {
+    format_char = get_next_format_char(format_string);
+    return true;
+  }
+  return false;
+}
+
+// The template tail printer helper
+template<typename Ft, typename... Ts>
+struct __FMT
+{
+  Ft format_string;
+  __FMT(Ft f, Ts ... args) : format_string(f) {}
+  inline void tstreamf(Print& stm, Ft format) const
+  {
+    while(char c = get_next_format_char(format))
+    {
+      check_backslash(c, format);
+      if ( c )
+        stm.print(c);
+    }
+  }
+};
+
+// The variadic template helper
+template<typename Ft, typename T, typename... Ts>
+struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
+{
+  const int size = sizeof...(Ts);
+  T val;
+  __FMT(Ft f, T t, Ts... ts) : __FMT<Ft, Ts...>(f, ts...), val(t) {}
+  inline void tstreamf(Print& stm, Ft format) const
+  {
+    while(char c = get_next_format_char(format))
+    {
+      if (!check_backslash(c, format))
+      {
+        if ( c == '%')
+        {
+          stm << val;
+          // Variadic recursion ... compiler rolls this out during 
+          // template argument pack expansion
+          __FMT<Ft, Ts...>::tstreamf(stm, format);
+          return;
+        }
+      }
+      if (c)
+        stm.print(c);
+    }
+  }
+};
+
+// The actual operator should you only instanciate the FMT 
+// helper with a format string and no parameters
+template<typename Ft, typename... Ts>
+inline Print& operator <<(Print &stm, const __FMT<Ft, Ts...> &args)
+{
+    args.tstreamf(stm, args.format_string);
+    return stm;
+}
+
+// The variadic stream helper
+template<typename Ft, typename T, typename... Ts>
+inline Print& operator <<(Print &stm, const __FMT<Ft, T, Ts...> &args)
+{
+    args.tstreamf(stm, args.format_string);
+    return stm;
+}
+
+// As we don't have C++17, we can't get a constructor to use
+// automatic argument deduction, but ... this little trick gets
+// around that ...
+template<typename Ft, typename... Ts>
+__FMT<Ft, Ts...> _FMT(Ft format, Ts ... args) { return __FMT<Ft, Ts...>(format, args...); }
 
 #endif

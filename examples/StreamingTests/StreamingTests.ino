@@ -178,6 +178,20 @@ void loop()
     Assert << _WIDTH(F("one"),5) == F("  one");
 
     //
+    //  Stream formatter
+    //
+
+    Assert << _FMT("Hello % the time is %:%:%", "gazoodle", _WIDTHZ(1,2), _WIDTHZ(4,2), _WIDTHZ(8,2)) == F("Hello gazoodle the time is 01:04:08");
+    Assert << _FMT("Too many % % % for the parms", 1) == F("Too many 1 % % for the parms");
+    Assert << _FMT("Too few % for the parms", 1, 2) == F("Too few 1 for the parms");
+    Assert << _FMT("Output a \\% sign") == F("Output a % sign");
+    Assert << _FMT("Handle trailing \\") == F("Handle trailing ");
+    Assert << _FMT(F("Replace % with %"), 1, 2 ) == F("Replace 1 with 2");
+    Assert << _FMT("Your score is %\\%", 65.3) == F("Your score is 65.30%");
+    Assert << _FMT("Once % a %%%", F("upon"), 't', 1, "me" ) == F("Once upon a t1me");
+    Assert << _FMT("This [%][%][%] grid", _WIDTH(10, 4), _WIDTH(_HEX(619),4), _WIDTH(3,4)) == F("This [  10][ 26B][   3] grid");
+
+    //
     //  Make sure that all the stream operators return the stream
     //  by chaining them together.
     //
@@ -188,10 +202,11 @@ void loop()
         << _HEX(3)              // _BASED
         << _FLOAT(4,0)          // _FLOAT
         << _PAD(1,'5')          // Padding
-
+        << _WIDTH(6,1)          // Width
+        << _FMT("%",7)          // Formatter
         << endl
 
-        == F("12345\r\n");
+        == F("1234567\r\n");
 
     //
     // Final report
