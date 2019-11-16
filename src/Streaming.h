@@ -99,7 +99,7 @@ inline Print &operator <<(Print &obj, const _FLOAT &arg)
 
 enum _EndLineCode { endl };
 
-inline Print &operator <<(Print &obj, _EndLineCode arg)
+inline Print &operator <<(Print &obj, _EndLineCode)
 { obj.println(); return obj; }
 
 #endif
