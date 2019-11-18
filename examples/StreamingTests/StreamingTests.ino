@@ -176,6 +176,13 @@ void loop()
     Assert << _WIDTH(abc, 5) == F("  abc");
     Assert << _WIDTH("one", 5) == F("  one");
     Assert << _WIDTH(F("one"),5) == F("  one");
+    // Check lightweight std::is_signed on AVR platforms
+    Assert << _WIDTH((int8_t)-1, 11) ==     F("         -1");
+    Assert << _WIDTH((uint8_t)-1, 11) ==    F("        255");
+    Assert << _WIDTH((int16_t)-1, 11) ==    F("         -1");
+    Assert << _WIDTH((uint16_t)-1, 11) ==   F("      65535");
+    Assert << _WIDTH((int32_t)-1, 11) ==    F("         -1");
+    Assert << _WIDTH((uint32_t)-1, 11) ==   F(" 4294967295");
 
     //
     //  Stream formatter

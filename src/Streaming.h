@@ -43,7 +43,21 @@
 #else
 #include "WProgram.h"
 #endif
+#ifdef ARDUINO_ARCH_AVR
+// No stl library, so need trivial version of std::is_signed ...
+namespace std {
+template<typename T>
+  struct is_signed { static const bool value = false; };
+  template<>
+  struct is_signed<int8_t> { static const bool value = true; };
+  template<>
+  struct is_signed<int16_t> { static const bool value = true; };
+  template<>
+  struct is_signed<int32_t> { static const bool value = true; };
+};
+#else
 #include <type_traits>
+#endif
 
 #define STREAMING_LIBRARY_VERSION 6
 
