@@ -43,7 +43,21 @@
 #else
 #include "WProgram.h"
 #endif
+#ifdef ARDUINO_ARCH_AVR
+// No stl library, so need trivial version of std::is_signed ...
+namespace std {
+template<typename T>
+  struct is_signed { static const bool value = false; };
+  template<>
+  struct is_signed<int8_t> { static const bool value = true; };
+  template<>
+  struct is_signed<int16_t> { static const bool value = true; };
+  template<>
+  struct is_signed<int32_t> { static const bool value = true; };
+};
+#else
 #include <type_traits>
+#endif
 
 #define STREAMING_LIBRARY_VERSION 6
 
@@ -163,11 +177,13 @@ inline Print &operator <<(Print& stm, const _PAD &arg)
 //    for(int index=0; index<byte_array_size; index++)
 //      Serial << _WIDTHZ(_HEX(byte_array[index]))
 
-template<typename T, int8_t WIDTH, char PAD = ' '>
+template<typename T>
 struct __WIDTH
 {
   const T& val;
-  __WIDTH(const T& v) : val(v) {}
+  int8_t width;
+  char pad;
+  __WIDTH(const T& v,int8_t w,char p) : val(v), width(w), pad(p) {}
 };
 
 //  Count digits in an integer of specific base
@@ -204,14 +220,17 @@ template<typename T>
 inline uint8_t get_value_width(_BASED<T> b)
 { return digits(b.val, b.base); }
 
-// Macros to hide the template requirement specification
-#define _WIDTH(a,w)       __WIDTH<typeof(a), w>(a)
-#define _WIDTHZ(a,w)      __WIDTH<typeof(a), w, '0'>(a)
+// Constructor wrapper to allow automatic template parameter deduction
+template<typename T>
+__WIDTH<T> _WIDTH(T val, int8_t width) { return __WIDTH<T>(val, width, ' '); }
+template<typename T>
+__WIDTH<T> _WIDTHZ(T val, int8_t width) { return __WIDTH<T>(val, width, '0'); }
+
 
 // Operator overload to handle width printing.
-template<typename T, int8_t WIDTH, char PAD>
-inline Print &operator <<(Print &stm, const __WIDTH<T, WIDTH, PAD> &arg)
-{ stm << _PAD(WIDTH-get_value_width(arg.val), PAD); stm << arg.val; return stm; }
+template<typename T>
+inline Print &operator <<(Print &stm, const __WIDTH<T> &arg)
+{ stm << _PAD(arg.width-get_value_width(arg.val), arg.pad); stm << arg.val; return stm; }
 
 
 // Specialization for replacement formatting
@@ -275,7 +294,6 @@ struct __FMT
 template<typename Ft, typename T, typename... Ts>
 struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
 {
-  const int size = sizeof...(Ts);
   T val;
   __FMT(Ft f, T t, Ts... ts) : __FMT<Ft, Ts...>(f, ts...), val(t) {}
   inline void tstreamf(Print& stm, Ft format) const

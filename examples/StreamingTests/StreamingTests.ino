@@ -37,20 +37,20 @@ inline Print& operator==(Print& stm, T expected)
     _Assert* assert = reinterpret_cast<_Assert*>(&stm);
     int8_t cmp = assert->compare(expected);
     // Would love to use the streaming functions here, but as we're testing them we can't
-    Serial.print(F("Test "));
+    Serial.print("Test ");
     Serial.print(++ran);
     if ( cmp == 0 )
     {
-        Serial.println(F(" passed."));
+        Serial.println(" passed.");
         passed++;
     }
     else
     {
-        Serial.print(F(" failed. Expected ["));
+        Serial.print(" failed. Expected [");
         Serial.print(expected);
-        Serial.print(F("] but was ["));
+        Serial.print("] but was [");
         Serial.print(assert->buffer());
-        Serial.println(F("]."));
+        Serial.println("].");
     }
     assert->reset();
     return stm;
@@ -175,7 +175,14 @@ void loop()
     Assert << _WIDTHZ(_HEX(128), 5) == F("00080");
     Assert << _WIDTH(abc, 5) == F("  abc");
     Assert << _WIDTH("one", 5) == F("  one");
-    Assert << _WIDTH(F("one"),5) == F("  one");
+    Assert << _WIDTH(F("one"), 5) == F("  one");
+    // Check lightweight std::is_signed on AVR platforms
+    Assert << _WIDTH((int8_t)-1, 11) ==     F("         -1");
+    Assert << _WIDTH((uint8_t)-1, 11) ==    F("        255");
+    Assert << _WIDTH((int16_t)-1, 11) ==    F("         -1");
+    Assert << _WIDTH((uint16_t)-1, 11) ==   F("      65535");
+    Assert << _WIDTH((int32_t)-1, 11) ==    F("         -1");
+    Assert << _WIDTH((uint32_t)-1, 11) ==   F(" 4294967295");
 
     //
     //  Stream formatter
