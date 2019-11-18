@@ -13,7 +13,7 @@
 
 ** Description
 
-   Streaming C++-style Output with Operator <<.  Supports _DEC, _BIN, _HEX, _OCT, _WIDTH, _WIDTHZ and _FMT stream helpers
+   Streaming C++-style Output with Operator <<.  Supports _DEC, _BIN, _HEX, _OCT, _FLOAT, _PAD, _WIDTH, _WIDTHZ and _FMT stream helpers. See example code for usage details
 
 * Source
 
