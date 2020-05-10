@@ -61,6 +61,16 @@ class PrintableTest : public Printable
     size_t printTo(Print& p) const { return p.print("printed"); }
 };
 
+class NoCopyConstructorType : public Printable
+{
+public:
+    NoCopyConstructorType() {}
+    size_t printTo(Print& p) const { return p.print("NoCopyCtr"); }
+private:
+    // Remove the copy constructor which will ensure that it can't be passed to the streaming template by value
+    NoCopyConstructorType(NoCopyConstructorType&) {}
+};
+
 void setup()
 {
     Serial.begin(115200);
@@ -214,6 +224,13 @@ void loop()
         << endl
 
         == F("1234567\r\n");
+
+    //
+    // Ensure streaming template overide doesn't pass by value
+    //
+    Assert 
+        << NoCopyConstructorType()
+        == F("NoCopyCtr");
 
     //
     // Final report
