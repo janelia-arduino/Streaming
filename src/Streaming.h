@@ -67,7 +67,7 @@ template<typename T>
 
 // Generic template
 template<class T>
-inline Print &operator <<(Print &stream, T arg)
+inline Print &operator <<(Print &stream, const T &arg)
 { stream.print(arg); return stream; }
 
 template<typename T>
