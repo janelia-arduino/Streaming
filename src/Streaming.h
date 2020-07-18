@@ -41,9 +41,12 @@
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
+#ifndef STREAMING_CONSOLE
 #include "WProgram.h"
 #endif
-#ifdef ARDUINO_ARCH_AVR
+#endif
+
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR)
 // No stl library, so need trivial version of std::is_signed ...
 namespace std {
 template<typename T>
@@ -212,8 +215,10 @@ inline uint8_t get_value_width(T val)
 inline uint8_t get_value_width(const char * val)
 { return strlen(val); }
 
+#ifdef ARDUINO
 inline uint8_t get_value_width(const __FlashStringHelper * val)
 { return strlen_P(reinterpret_cast<const char *>(val)); }
+#endif
 
 // _BASED<T> get the width of a value
 template<typename T>
@@ -255,12 +260,14 @@ inline char get_next_format_char(const char *& format_string)
   return format_char;
 }
 
+#ifdef ARDUINO
 inline char get_next_format_char(const __FlashStringHelper*& format_string)
 {
   char format_char = pgm_read_byte(format_string);
   if ( format_char > 0 ) format_string = reinterpret_cast<const __FlashStringHelper*>(reinterpret_cast<const char *>(format_string)+1);
   return format_char;
 }
+#endif
 
 template<typename Ft>
 inline bool check_backslash(char& format_char, Ft& format_string)
