@@ -240,6 +240,33 @@ template<typename T>
 inline Print &operator <<(Print &stm, const __WIDTH<T> &arg)
 { stm << _PAD(arg.width-get_value_width(arg.val), arg.pad); stm << arg.val; return stm; }
 
+// Specialization for class _FLOATW
+// feature like this:
+//   Serial << _FLOATW(gps_latitude, 6, 10); // 6 digits of precision, pad to 10 chars with default ' '
+
+struct _FLOATW
+{
+  float val;
+  int digits;
+  int8_t width;
+  char pad;
+  _FLOATW(double v, int d, int8_t w, char p = ' '): val(v), digits(d), width(w), pad(p) {};
+};
+
+inline Print &operator <<(Print &stm, const _FLOATW &arg)
+{ 
+  int mul = 1; for (uint8_t i=0; i < arg.digits; i++) mul *= 10;
+  int val = abs(round(arg.val * mul));
+  int q = val / mul;
+  int r = val - q * mul;
+  int pad = arg.width - (get_value_width(q) + 1 + arg.digits);
+  if (arg.val < 0.)
+    stm << _PAD(pad - 1, arg.pad) << "-"; 
+  else
+    stm << _PAD(pad, arg.pad); 
+  stm << q << "." << _WIDTHZ(r, arg.digits);
+  return stm; 
+}
 
 // Specialization for replacement formatting
 //
