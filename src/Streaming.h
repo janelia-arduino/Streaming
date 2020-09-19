@@ -197,7 +197,10 @@ inline uint8_t digits(T v, int8_t base = 10)
   if ( std::is_signed<T>::value )
   {
     if ( v < 0 )
+    {
       digits++;
+      v = -v; // v needs to be postive for the digits counter to work
+    }
   }
   do
   {
