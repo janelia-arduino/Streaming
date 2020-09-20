@@ -255,16 +255,15 @@ struct _FLOATW
 
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  int mul = 1; for (uint8_t i=0; i < arg.digits; i++) mul *= 10;
-  int val = abs(round(arg.val * mul));
-  int q = val / mul;
-  int r = val - q * mul;
-  int pad = arg.width - (get_value_width(q) + 1 + arg.digits);
-  if (arg.val < 0.)
-    stm << _PAD(pad - 1, arg.pad) << "-"; 
-  else
-    stm << _PAD(pad, arg.pad); 
-  stm << q << "." << _WIDTHZ(r, arg.digits);
+  double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
+  bool neg = arg.val < 0.;
+  double dblv = arg.val;
+
+  int intv = int( neg ? -ceil(dblv - rd) : floor(dblv + rd) ); 
+  uint8_t w = get_value_width(intv) + 1 + arg.digits + (neg ? 1 : 0);
+
+  stm << _PAD(arg.width - w, arg.pad); 
+  stm.print(arg.val, arg.digits);
   return stm; 
 }
 
