@@ -205,7 +205,7 @@ inline uint8_t digits(T v, int8_t base = 10)
   do
   {
     v /= base;
-      digits++;
+    digits++;
   } while( v > 0 );
   return digits;
 }
@@ -255,13 +255,15 @@ struct _FLOATW
 
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
   bool neg = arg.val < 0.;
-  double dblv = arg.val;
-
-  int intv = int( neg ? -ceil(dblv - rd) : floor(dblv + rd) ); 
-  uint8_t w = get_value_width(intv) + 1 + arg.digits + (neg ? 1 : 0);
-
+  double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
+  double dblv = neg ? -(arg.val - rd) : arg.val + rd; 
+  uint8_t w = 1 + arg.digits + (neg ? 1 : 0);
+  do
+  {
+    dblv /= 10.;
+    w++;
+  } while (dblv > 1.);
   stm << _PAD(arg.width - w, arg.pad); 
   stm.print(arg.val, arg.digits);
   return stm; 
