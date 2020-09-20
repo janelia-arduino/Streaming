@@ -209,7 +209,9 @@ void loop()
     Assert << _FLOATW(-1,  2, 11) ==        F("      -1.00");
     Assert << _FLOATW(0. / 0., 2, 11) ==    F("        nan");
     Assert << _FLOATW(1. / 0., 2, 11) ==    F("        inf");
+    #ifndef ESP8266 // no ovf on esp8266
     Assert << _FLOATW(1.e10, 2, 11) ==      F("        ovf");
+    #endif
 
     //
     //  Stream formatter

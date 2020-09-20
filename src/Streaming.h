@@ -255,9 +255,16 @@ struct _FLOATW
 
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  uint8_t w;
-  if (std::isnan(arg.val) or std::isinf(arg.val) or arg.val > 4294967040.0 or arg.val < -4294967040.0) 
-    w = 3;
+  uint8_t w; 
+
+  #ifdef ESP8266 
+    #define isovf(v) false // esp8266 use dtstrf for printFloat and has no ovf in its definition 
+  #else
+    #define isovf(v) ((v) > 4294967040.0 or (v) < -4294967040.0)
+  #endif
+
+  if (isnan(arg.val) or isinf(arg.val) or isovf(arg.val)) 
+    w = 3; // for "nan", "inf" or "ovf" - check Print::printFloat()
   else
   {
     double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
