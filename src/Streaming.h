@@ -253,30 +253,31 @@ struct _FLOATW
   _FLOATW(double v, int d, int8_t w, char p = ' '): val(v), digits(d), width(w), pad(p) {};
 };
 
+// PrintBuf implementation of Print for temp buffers
+template <size_t N>
+class PrintBuf : public Print
+{
+  size_t pos = 0;
+  char str[N + 1] {}; // init with 0
+
+public:
+  inline const char* operator() () { return str; };
+  inline size_t write(uint8_t c) { return write(&c, 1); };
+  inline size_t write(const uint8_t *buffer, size_t size)
+  {
+    size_t s = constrain(size, 0, N - pos);
+    strncpy(&str[pos], (const char *)buffer, s);
+    pos += s;
+    return s;
+  };
+};
+
+// don't do the work twice : print the float in a buf before padding it
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  uint8_t w; // width of the float as a str
-
-  #ifdef ESP8266 
-    #define isovf(v) false // esp8266 uses dtostrf for printFloat and enforces no ovf
-  #else
-    #define isovf(v) ((v) > 4294967040.0 or (v) < -4294967040.0) // check Print::printFloat for ovf tests
-  #endif
-
-  if (isnan(arg.val) or isinf(arg.val) or isovf(arg.val)) 
-    w = 3; // for "nan", "inf" or "ovf"
-
-  else
-  {
-    double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.; // compute round for the precision
-    double dblv = abs(arg.val) + rd; // make it positive and round it
-    w = (arg.val < 0. ? 1 : 0) + (arg.digits ? 1 : 0) + arg.digits; // minus, dot and digits after decimal
-    do w++; while ((dblv /= 10.) >= 1.); // digits before decimal
-  }
-  
-  stm << _PAD(arg.width - w, arg.pad); 
-  stm.print(arg.val, arg.digits);
-  return stm; 
+  PrintBuf<63> buf; // 63 chars + \0
+  size_t size = buf.print(arg.val, arg.digits); // print the float in buf
+  return stm << _PAD(arg.width - size, arg.pad) << buf(); // pad it
 }
 
 // Specialization for replacement formatting
