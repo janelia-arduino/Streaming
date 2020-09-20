@@ -255,22 +255,22 @@ struct _FLOATW
 
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  uint8_t w; 
+  uint8_t w; // width of the float as a str
 
   #ifdef ESP8266 
-    #define isovf(v) false // esp8266 use dtstrf for printFloat and has no ovf in its definition 
+    #define isovf(v) false // esp8266 uses dtostrf for printFloat and enforces no ovf
   #else
-    #define isovf(v) ((v) > 4294967040.0 or (v) < -4294967040.0)
+    #define isovf(v) ((v) > 4294967040.0 or (v) < -4294967040.0) // check Print::printFloat for ovf tests
   #endif
 
   if (isnan(arg.val) or isinf(arg.val) or isovf(arg.val)) 
-    w = 3; // for "nan", "inf" or "ovf" - check Print::printFloat()
+    w = 3; // for "nan", "inf" or "ovf"
   else
   {
-    double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
-    double dblv = abs(arg.val) + rd; 
-    w = (arg.digits ? 1 : 0) + arg.digits + (arg.val < 0. ? 1 : 0);
-    do w++; while ((dblv /= 10.) > 1.);
+    double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.; // compute round for the precision
+    double dblv = abs(arg.val) + rd; // make it positive and round it
+    w = (arg.val < 0. ? 1 : 0) + arg.digits + (arg.digits ? 1 : 0); // minus, dot, digits after decimal
+    do w++; while ((dblv /= 10.) > 1.); // digits before decimal
   }
   
   stm << _PAD(arg.width - w, arg.pad); 
