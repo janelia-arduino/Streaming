@@ -255,13 +255,18 @@ struct _FLOATW
 
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
-  double dblv = abs(arg.val) + rd; 
+  uint8_t w;
+  if (std::isnan(arg.val) or std::isinf(arg.val) or arg.val > 4294967040.0 or arg.val < -4294967040.0) 
+    w = 3;
+  else
+  {
+    double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.;
+    double dblv = abs(arg.val) + rd; 
+    w = (arg.digits ? 1 : 0) + arg.digits + (arg.val < 0. ? 1 : 0);
+    do w++; while ((dblv /= 10.) > 1.);
+  }
   
-  uint8_t pad = arg.width - (1 + arg.digits + (arg.val < 0. ? 1 : 0));
-  do pad--; while ((dblv /= 10.) > 1.);
-  
-  stm << _PAD(pad, arg.pad); 
+  stm << _PAD(arg.width - w, arg.pad); 
   stm.print(arg.val, arg.digits);
   return stm; 
 }
