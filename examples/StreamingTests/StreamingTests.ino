@@ -193,6 +193,23 @@ void loop()
     Assert << _WIDTH((uint16_t)-1, 11) ==   F("      65535");
     Assert << _WIDTH((int32_t)-1, 11) ==    F("         -1");
     Assert << _WIDTH((uint32_t)-1, 11) ==   F(" 4294967295");
+    Assert << _WIDTH((int8_t)-20, 11) ==    F("        -20");
+    Assert << _WIDTH((int16_t)-32767, 11) ==F("     -32767");
+    Assert << _WIDTH((int32_t)-65536, 11) ==F("     -65536");
+    
+    //
+    //  Width streaming for floats
+    //
+
+    Assert << _FLOATW(2.71828, 2, 11) ==    F("       2.72");
+    Assert << _FLOATW(-3.1415926, 6, 11) == F("  -3.141593");
+    Assert << _FLOATW(-9.999999, 4, 11) ==  F("   -10.0000");
+    Assert << _FLOATW(0.999, 2, 11) ==      F("       1.00");
+    Assert << _FLOATW(1.4, 0, 11) ==        F("          1");
+    Assert << _FLOATW(-1,  2, 11) ==        F("      -1.00");
+    Assert << _FLOATW(0. / 0., 2, 11) ==    F("        nan");
+    Assert << _FLOATW(1. / 0., 2, 11) ==    F("        inf");
+    Assert << _FLOATW(1.e10, 2, 11) ==      F("        ovf");
 
     //
     //  Stream formatter
