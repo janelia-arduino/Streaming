@@ -265,12 +265,13 @@ inline Print &operator <<(Print &stm, const _FLOATW &arg)
 
   if (isnan(arg.val) or isinf(arg.val) or isovf(arg.val)) 
     w = 3; // for "nan", "inf" or "ovf"
+
   else
   {
     double rd = .5; for (uint8_t i=0; i < arg.digits; i++) rd /= 10.; // compute round for the precision
     double dblv = abs(arg.val) + rd; // make it positive and round it
-    w = (arg.val < 0. ? 1 : 0) + arg.digits + (arg.digits ? 1 : 0); // minus, dot, digits after decimal
-    do w++; while ((dblv /= 10.) > 1.); // digits before decimal
+    w = (arg.val < 0. ? 1 : 0) + (arg.digits ? 1 : 0) + arg.digits; // minus, dot and digits after decimal
+    do w++; while ((dblv /= 10.) >= 1.); // digits before decimal
   }
   
   stm << _PAD(arg.width - w, arg.pad); 

@@ -201,16 +201,18 @@ void loop()
     //  Width streaming for floats
     //
 
-    Assert << _FLOATW(2.71828, 2, 11) ==    F("       2.72");
+    Assert << _FLOATW(-1,         2, 11) == F("      -1.00");
+    Assert << _FLOATW(1.23456e4,  1, 11) == F("    12345.6");
     Assert << _FLOATW(-3.1415926, 6, 11) == F("  -3.141593");
-    Assert << _FLOATW(-9.999999, 4, 11) ==  F("   -10.0000");
-    Assert << _FLOATW(0.999, 2, 11) ==      F("       1.00");
-    Assert << _FLOATW(1.4, 0, 11) ==        F("          1");
-    Assert << _FLOATW(-1,  2, 11) ==        F("      -1.00");
-    Assert << _FLOATW(0. / 0., 2, 11) ==    F("        nan");
-    Assert << _FLOATW(1. / 0., 2, 11) ==    F("        inf");
+    Assert << _FLOATW(-9.999999,  4, 11) == F("   -10.0000");
+    Assert << _FLOATW(-0.0,       1, 11) == F("        0.0");
+    Assert << _FLOATW(-0.01,      1, 11) == F("       -0.0");
+    Assert << _FLOATW(-0.01,      0, 11) == F("         -0");
+    Assert << _FLOATW(1.4,        0, 11) == F("          1");
+    Assert << _FLOATW(0. / 0.,    2, 11) == F("        nan");
+    Assert << _FLOATW(-1. / 0.,   2, 11) == F("        inf");
     #ifndef ESP8266 // no ovf on esp8266
-    Assert << _FLOATW(1.e10, 2, 11) ==      F("        ovf");
+    Assert << _FLOATW(1.e10,      2, 11) == F("        ovf");
     #endif
 
     //
