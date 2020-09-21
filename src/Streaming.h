@@ -253,21 +253,23 @@ struct _FLOATW
   _FLOATW(double v, int d, int8_t w, char p = ' '): val(v), digits(d), width(w), pad(p) {};
 };
 
-// PrintBuf implementation of Print for temp buffers
+// PrintBuffer implementation of Print, small buffer to print in
 template <size_t N>
-class PrintBuf : public Print
+class PrintBuffer : public Print
 {
-  size_t pos = 0;
-  char str[N + 1] {}; // init with 0
-
+  size_t  pos = 0;
+  char    str[N] {};
 public:
-  inline const char* operator() () { return str; };
+  inline char* operator() () { return str; };
   inline size_t write(uint8_t c) { return write(&c, 1); };
   inline size_t write(const uint8_t *buffer, size_t size)
   {
-    size_t s = constrain(size, 0, N - pos);
-    strncpy(&str[pos], (const char *)buffer, s);
-    pos += s;
+    size_t s = min(size, N-1 - pos); // need a /0 left
+    if (s)
+    {
+      memcpy(&str[pos], buffer, s);
+      pos += s;
+    }
     return s;
   };
 };
@@ -275,9 +277,9 @@ public:
 // don't do the work twice : print the float in a buf before padding it
 inline Print &operator <<(Print &stm, const _FLOATW &arg)
 { 
-  PrintBuf<63> buf; // 63 chars + \0
-  size_t size = buf.print(arg.val, arg.digits); // print the float in buf
-  return stm << _PAD(arg.width - size, arg.pad) << buf(); // pad it
+  PrintBuffer<32> buf; // it's only ~45B on the stack, no allocation, leak or fragmentation
+  size_t size = buf.print(arg.val, arg.digits); 
+  return stm << _PAD(arg.width - size, arg.pad) << buf(); 
 }
 
 // Specialization for replacement formatting
