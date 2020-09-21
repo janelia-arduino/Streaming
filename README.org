@@ -4,7 +4,7 @@
 
 * Library Information
   - Name :: Streaming
-  - Version :: 6.0.6
+  - Version :: 6.0.7
   - License :: GNU LGPL
   - URL :: https://github.com/janelia-arduino/Streaming
   - Author :: Mikal Hart
