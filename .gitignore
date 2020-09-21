@@ -35,3 +35,13 @@
 /sftp-config.json
 .tags
 .tags_sorted_by_file
+
+# for platformio on vscode
+platformio.ini
+main.cpp
+/.pio
+/.vscode
+
+
+
+
