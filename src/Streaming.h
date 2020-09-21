@@ -68,6 +68,29 @@ template<typename T>
 #define typeof(x) __typeof__(x)
 #endif
 
+// PrintBuffer implementation of Print, a small buffer to print in
+// see its use with pad_float()
+template <size_t N>
+class PrintBuffer : public Print
+{
+  size_t  pos = 0;
+  char    str[N] {};
+public:
+  inline const char *operator() () { return str; };
+  // inline void clear() { pos = 0; str[0] = '\0'; };
+  inline size_t write(uint8_t c) { return write(&c, 1); };
+  inline size_t write(const uint8_t *buffer, size_t size)
+  {
+    size_t s = min(size, N-1 - pos); // need a /0 left
+    if (s)
+    {
+      memcpy(&str[pos], buffer, s);
+      pos += s;
+    }
+    return s;
+  };
+};
+
 // Generic template
 template<class T>
 inline Print &operator <<(Print &stream, const T &arg)
@@ -124,7 +147,7 @@ inline Print &operator <<(Print &obj, const _BASED<T> &arg)
 
 struct _FLOAT
 {
-  float val;
+  double val; // only Print::print(double)
   int digits;
   _FLOAT(double v, int d): val(v), digits(d)
   {}
@@ -186,7 +209,7 @@ struct __WIDTH
   const T& val;
   int8_t width;
   char pad;
-  __WIDTH(const T& v,int8_t w,char p) : val(v), width(w), pad(p) {}
+  __WIDTH(const T& v, int8_t w, char p) : val(v), width(w), pad(p) {}
 };
 
 //  Count digits in an integer of specific base
@@ -238,49 +261,23 @@ __WIDTH<T> _WIDTHZ(T val, int8_t width) { return __WIDTH<T>(val, width, '0'); }
 // Operator overload to handle width printing.
 template<typename T>
 inline Print &operator <<(Print &stm, const __WIDTH<T> &arg)
-{ stm << _PAD(arg.width-get_value_width(arg.val), arg.pad); stm << arg.val; return stm; }
+{ stm << _PAD(arg.width - get_value_width(arg.val), arg.pad) << arg.val; return stm; }
 
-// Specialization for class _FLOATW
-// feature like this:
-//   Serial << _FLOATW(gps_latitude, 6, 10); // 6 digits of precision, pad to 10 chars with default ' '
-
-struct _FLOATW
+// explicit Operator overload to handle width printing of _FLOAT, double and float
+template<typename T>
+inline Print &pad_float(Print &stm, const double val, const int digits, const __WIDTH<T> &arg)
 {
-  float val;
-  int digits;
-  int8_t width;
-  char pad;
-  _FLOATW(double v, int d, int8_t w, char p = ' '): val(v), digits(d), width(w), pad(p) {};
-};
-
-// PrintBuffer implementation of Print, small buffer to print in
-template <size_t N>
-class PrintBuffer : public Print
-{
-  size_t  pos = 0;
-  char    str[N] {};
-public:
-  inline char* operator() () { return str; };
-  inline size_t write(uint8_t c) { return write(&c, 1); };
-  inline size_t write(const uint8_t *buffer, size_t size)
-  {
-    size_t s = min(size, N-1 - pos); // need a /0 left
-    if (s)
-    {
-      memcpy(&str[pos], buffer, s);
-      pos += s;
-    }
-    return s;
-  };
-};
-
-// don't do the work twice : print the float in a buf before padding it
-inline Print &operator <<(Print &stm, const _FLOATW &arg)
-{ 
   PrintBuffer<32> buf; // it's only ~45B on the stack, no allocation, leak or fragmentation
-  size_t size = buf.print(arg.val, arg.digits); 
-  return stm << _PAD(arg.width - size, arg.pad) << buf(); 
+  size_t size = buf.print(val, digits); // print in buf
+  return stm << _PAD(arg.width - size, arg.pad) << buf(); // pad and concat what's in buf
 }
+
+inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg) { return pad_float(stm, arg.val, 2, arg); }; // see Print::print(double, int = 2)
+inline Print &operator <<(Print &stm, const __WIDTH<double> &arg) { return pad_float(stm, arg.val, 2, arg); }; // see Print::print(double, int = 2)
+inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg) { return pad_float(stm, arg.val.val, arg.val.digits, arg); };
+
+// a less verbose _FLOATW for _WIDTH(_FLOAT)
+#define _FLOATW(val, digits, width) _WIDTH<_FLOAT>(_FLOAT((val), (digits)), (width))
 
 // Specialization for replacement formatting
 //

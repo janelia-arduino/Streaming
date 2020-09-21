@@ -196,10 +196,14 @@ void loop()
     Assert << _WIDTH((int8_t)-20, 11) ==    F("        -20");
     Assert << _WIDTH((int16_t)-32767, 11) ==F("     -32767");
     Assert << _WIDTH((int32_t)-65536, 11) ==F("     -65536");
-    
+
     //
     //  Width streaming for floats
     //
+
+    Assert << _WIDTH(_FLOAT(-9.99, 1), 11)==F("      -10.0");
+    Assert << _WIDTH(-3.14159, 11)       == F("      -3.14"); // default nb of digits after decimal point is 2 for print(double)
+    Assert << _WIDTH((float)12.566, 11)  == F("      12.57");
 
     Assert << _FLOATW(-1,         2, 11) == F("      -1.00");
     Assert << _FLOATW(1.23456e4,  1, 11) == F("    12345.6");
