@@ -76,9 +76,15 @@ class PrintBuffer : public Print
   size_t  pos = 0;
   char    str[N] {};
 public:
-  inline const char *operator() () { return str; };
-  // inline void clear() { pos = 0; str[0] = '\0'; };
-  inline size_t write(uint8_t c) { return write(&c, 1); };
+  inline const char *operator() () 
+  { return str; };
+  
+  // inline void clear() 
+  // { pos = 0; str[0] = '\0'; };
+  
+  inline size_t write(uint8_t c) 
+  { return write(&c, 1); };
+  
   inline size_t write(const uint8_t *buffer, size_t size)
   {
     size_t s = min(size, N-1 - pos); // need a /0 left
@@ -265,16 +271,21 @@ inline Print &operator <<(Print &stm, const __WIDTH<T> &arg)
 
 // explicit Operator overload to handle width printing of _FLOAT, double and float
 template<typename T>
-inline Print &pad_float(Print &stm, const double val, const int digits, const __WIDTH<T> &arg)
+inline Print &pad_float(Print &stm, const __WIDTH<T> &arg, const double val, const int digits = 2) // see Print::print(double, int = 2)
 {
   PrintBuffer<32> buf; // it's only ~45B on the stack, no allocation, leak or fragmentation
   size_t size = buf.print(val, digits); // print in buf
   return stm << _PAD(arg.width - size, arg.pad) << buf(); // pad and concat what's in buf
 }
 
-inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg) { return pad_float(stm, arg.val, 2, arg); }; // see Print::print(double, int = 2)
-inline Print &operator <<(Print &stm, const __WIDTH<double> &arg) { return pad_float(stm, arg.val, 2, arg); }; // see Print::print(double, int = 2)
-inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg) { return pad_float(stm, arg.val.val, arg.val.digits, arg); };
+inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg) 
+{ return pad_float(stm, arg, arg.val); }; 
+
+inline Print &operator <<(Print &stm, const __WIDTH<double> &arg) 
+{ return pad_float(stm, arg, arg.val); }; 
+
+inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg) 
+{ auto& f = arg.val; return pad_float(stm, arg, f.val, f.digits); };
 
 // a less verbose _FLOATW for _WIDTH(_FLOAT)
 #define _FLOATW(val, digits, width) _WIDTH<_FLOAT>(_FLOAT((val), (digits)), (width))
