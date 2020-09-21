@@ -279,13 +279,13 @@ inline Print &pad_float(Print &stm, const __WIDTH<T> &arg, const double val, con
 }
 
 inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg) 
-{ return pad_float(stm, arg, arg.val); }; 
+{ return pad_float(stm, arg, arg.val); }
 
 inline Print &operator <<(Print &stm, const __WIDTH<double> &arg) 
-{ return pad_float(stm, arg, arg.val); }; 
+{ return pad_float(stm, arg, arg.val); } 
 
 inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg) 
-{ auto& f = arg.val; return pad_float(stm, arg, f.val, f.digits); };
+{ auto& f = arg.val; return pad_float(stm, arg, f.val, f.digits); }
 
 // a less verbose _FLOATW for _WIDTH(_FLOAT)
 #define _FLOATW(val, digits, width) _WIDTH<_FLOAT>(_FLOAT((val), (digits)), (width))
