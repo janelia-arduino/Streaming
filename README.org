@@ -4,7 +4,7 @@
 
 * Library Information
   - Name :: Streaming
-  - Version :: 6.0.5
+  - Version :: 6.0.7
   - License :: GNU LGPL
   - URL :: https://github.com/janelia-arduino/Streaming
   - Author :: Mikal Hart
@@ -13,7 +13,9 @@
 
 ** Description
 
-   Streaming C++-style Output with Operator <<.  Supports _DEC, _BIN, _HEX, _OCT, _FLOAT, _PAD, _WIDTH, _WIDTHZ and _FMT stream helpers. See example code for usage details
+   Streaming C++-style Output with Operator <<. Supports _DEC, _BIN, _HEX, _OCT,
+   _FLOAT, _PAD, _WIDTH, _WIDTHZ and _FMT stream helpers. See example code for
+   usage details.
 
 * Source
 
