@@ -208,9 +208,9 @@ void loop()
     Assert << _FLOATW(-1,         2, 11) == F("      -1.00");
     Assert << _FLOATW(1.23456e4,  1, 11) == F("    12345.6");
     #ifdef ARDUINO_ARCH_AVR
-    Assert << _FLOATW(-3.1415926, 6, 11) == F(" -3.141592");
+    Assert << _FLOATW(-3.1415926, 6, 11) == F("  -3.141592");
     #else
-    Assert << _FLOATW(-3.1415926, 6, 11) == F(" -3.141593");
+    Assert << _FLOATW(-3.1415926, 6, 11) == F("  -3.141593");
     #endif
     Assert << _FLOATW(-9.999999,  4, 11) == F("   -10.0000");
     Assert << _FLOATW(-0.0,       1, 11) == F("        0.0");
