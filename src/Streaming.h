@@ -212,7 +212,7 @@ inline Print &operator <<(Print& stm, const _PAD &arg)
 template<typename T>
 struct __WIDTH
 {
-  const T& val;
+  const T val;
   int8_t width;
   char pad;
   __WIDTH(const T& v, int8_t w, char p) : val(v), width(w), pad(p) {}
