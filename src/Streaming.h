@@ -68,6 +68,10 @@ template<typename T>
 #define typeof(x) __typeof__(x)
 #endif
 
+#ifndef min
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
 // PrintBuffer implementation of Print, a small buffer to print in
 // see its use with pad_float()
 template <size_t N>
