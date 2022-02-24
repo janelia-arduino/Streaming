@@ -22,7 +22,7 @@
     Copyright (c) 2019 Gazoodle. All rights reserved.
 
   1.  _BASED moved to template to remove type conversion to long and
-      sign changes which break int8_t and int16_t negative numbers. 
+      sign changes which break int8_t and int16_t negative numbers.
       The print implementation still upscales to long for it's internal
       print routine.
 
@@ -31,7 +31,7 @@
   3.  _WIDTH & _WIDTHZ added to allow width printing with space padding
       and zero padding for numerics
 
-  4.  Simple _FMT mechanism ala printf, but without the typeunsafetyness 
+  4.  Simple _FMT mechanism ala printf, but without the typeunsafetyness
       and no internal buffers for replaceable stream printing
 */
 
@@ -46,9 +46,8 @@
 #endif
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_MEGAAVR)
-// No stl library, so need trivial version of std::is_signed ...
-namespace std {
+// Do not use stl library, implement trivial version of std::is_signed
+namespace streaming_std {
 template<typename T>
   struct is_signed { static const bool value = false; };
   template<>
@@ -57,10 +56,13 @@ template<typename T>
   struct is_signed<int16_t> { static const bool value = true; };
   template<>
   struct is_signed<int32_t> { static const bool value = true; };
+  template<>
+  struct is_signed<int64_t> { static const bool value = true; };
+  template<>
+  struct is_signed<float> { static const bool value = true; };
+  template<>
+  struct is_signed<double> { static const bool value = true; };
 };
-#else
-#include <type_traits>
-#endif
 
 #define STREAMING_LIBRARY_VERSION 6
 
@@ -80,15 +82,15 @@ class PrintBuffer : public Print
   size_t  pos = 0;
   char    str[N] {};
 public:
-  inline const char *operator() () 
+  inline const char *operator() ()
   { return str; };
-  
-  // inline void clear() 
+
+  // inline void clear()
   // { pos = 0; str[0] = '\0'; };
-  
-  inline size_t write(uint8_t c) 
+
+  inline size_t write(uint8_t c)
   { return write(&c, 1); };
-  
+
   inline size_t write(const uint8_t *buffer, size_t size)
   {
     size_t s = min(size, N-1 - pos); // need a /0 left
@@ -180,7 +182,7 @@ inline Print &operator <<(Print &obj, _EndLineCode)
 // Specialization for padding & filling, mainly utilized
 // by the width printers
 //
-//  Use like 
+//  Use like
 //    Serial << _PAD(10,' ');   // Will output 10 spaces
 //    Serial << _PAD(4, '0');   // Will output 4 zeros
 struct _PAD
@@ -227,7 +229,7 @@ template<typename T>
 inline uint8_t digits(T v, int8_t base = 10)
 {
   uint8_t digits = 0;
-  if ( std::is_signed<T>::value )
+  if ( streaming_std::is_signed<T>::value )
   {
     if ( v < 0 )
     {
@@ -282,13 +284,13 @@ inline Print &pad_float(Print &stm, const __WIDTH<T> &arg, const double val, con
   return stm << _PAD(arg.width - size, arg.pad) << buf(); // pad and concat what's in buf
 }
 
-inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg) 
+inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg)
 { return pad_float(stm, arg, arg.val); }
 
-inline Print &operator <<(Print &stm, const __WIDTH<double> &arg) 
-{ return pad_float(stm, arg, arg.val); } 
+inline Print &operator <<(Print &stm, const __WIDTH<double> &arg)
+{ return pad_float(stm, arg, arg.val); }
 
-inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg) 
+inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg)
 { auto& f = arg.val; return pad_float(stm, arg, f.val, f.digits); }
 
 // a less verbose _FLOATW for _WIDTH(_FLOAT)
@@ -368,7 +370,7 @@ struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
         if ( c == '%')
         {
           stm << val;
-          // Variadic recursion ... compiler rolls this out during 
+          // Variadic recursion ... compiler rolls this out during
           // template argument pack expansion
           __FMT<Ft, Ts...>::tstreamf(stm, format);
           return;
@@ -380,7 +382,7 @@ struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
   }
 };
 
-// The actual operator should you only instanciate the FMT 
+// The actual operator should you only instanciate the FMT
 // helper with a format string and no parameters
 template<typename Ft, typename... Ts>
 inline Print& operator <<(Print &stm, const __FMT<Ft, Ts...> &args)
