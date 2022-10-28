@@ -70,9 +70,7 @@ template<typename T>
 #define typeof(x) __typeof__(x)
 #endif
 
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
+#define STREAMING_MIN(a,b) ((a)<(b)?(a):(b))
 
 // PrintBuffer implementation of Print, a small buffer to print in
 // see its use with pad_float()
@@ -93,7 +91,7 @@ public:
 
   inline size_t write(const uint8_t *buffer, size_t size)
   {
-    size_t s = min(size, N-1 - pos); // need a /0 left
+    size_t s = STREAMING_MIN(size, N-1 - pos); // need a /0 left
     if (s)
     {
       memcpy(&str[pos], buffer, s);
