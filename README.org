@@ -4,7 +4,7 @@
 
 * Library Information
   - Name :: Streaming
-  - Version :: 6.1.0
+  - Version :: 6.1.1
   - License :: GNU LGPL
   - URL :: https://github.com/janelia-arduino/Streaming
   - Authors :: Mikal Hart, gazoodle, victorh800, sebdelsol, Peter Polidoro
@@ -17,6 +17,48 @@
    _FLOAT, _PAD, _WIDTH, _WIDTHZ and _FMT stream helpers. See example code for
    usage details.
 
-* Source
+** Examples
+
+#+BEGIN_SRC cpp
+const int lettera = 'A';
+const int month = 4, day = 17, year = 2009;
+const int hour = 8, minute = 20, second = 3;
+const float pi = 3.14159;
+
+Serial << "This is an example of the new streaming" << endl;
+Serial << "library.  This allows you to print variables" << endl;
+Serial << "and strings without having to type line after" << endl;
+Serial << "line of Serial.print() calls.  Examples: " << endl;
+
+Serial << "A is " << lettera << "." << endl;
+Serial << "The current date is " << day << "-" << month << "-" << year << "." << endl;
+
+Serial << "You can use modifiers too, for example:" << endl;
+Serial << _BYTE(lettera) << " is " << _HEX(lettera) << " in hex. " << endl;
+Serial << endl;
+
+Serial << "In library v6, you also get" << endl;
+Serial << "Padding [" << _PAD(10, '*') << "]" << endl;
+Serial << "Width specification [" << _WIDTH(10, 5) << "]" << endl;
+Serial << "Leading zeros [" << _WIDTHZ(month,2) << "]" << endl;
+Serial << _FMT("Format strings for stuff like dates and times %/%/% %:%:%",
+  _WIDTHZ(day, 2), _WIDTHZ(month, 2), year,
+  _WIDTHZ(hour,2), _WIDTHZ(minute, 2), _WIDTHZ(second,2)) << endl;
+Serial << _FMT(F("To reduce your % size, these % can be in %"), F("sketch"), F("constants"), F("PROGMEM")) << endl;
+Serial << endl;
+
+Serial << "pi to 3 digits = " << _FLOAT(pi,3) << endl;
+#+END_SRC
+
+** Caveats
+
+- There may be issues using this library with some STL features.
+- The esp8266 Arduino core declares several "Stream& operator <<" in StreamDev.h
+  and defines them in StreamSend.cpp. If you wish to use this library with the
+  esp8266, you may need to comment out those lines in StreamDev.h and
+  StreamSend.cpp.
+
+
+* Original Source by Mikal Hart
 
   [[http://arduiniana.org/libraries/streaming/]]
