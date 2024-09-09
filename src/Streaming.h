@@ -103,8 +103,8 @@ public:
 
 // Generic template
 template<class T>
-inline Print &operator <<(Print &stream, const T &arg)
-{ stream.print(arg); return stream; }
+inline Print &operator <<(Print &strm, const T &arg)
+{ strm.print(arg); return strm; }
 
 template<typename T>
 struct _BASED
@@ -190,11 +190,11 @@ struct _PAD
   _PAD(int8_t w, char c) : width(w), chr(c) {}
 };
 
-inline Print &operator <<(Print& stm, const _PAD &arg)
+inline Print &operator <<(Print& strm, const _PAD &arg)
 {
   for(int8_t i = 0; i < arg.width; i++)
-    stm.print(arg.chr);
-  return stm;
+    strm.print(arg.chr);
+  return strm;
 }
 
 // Specialization for width printing
@@ -270,26 +270,26 @@ __WIDTH<T> _WIDTHZ(T val, int8_t width) { return __WIDTH<T>(val, width, '0'); }
 
 // Operator overload to handle width printing.
 template<typename T>
-inline Print &operator <<(Print &stm, const __WIDTH<T> &arg)
-{ stm << _PAD(arg.width - get_value_width(arg.val), arg.pad) << arg.val; return stm; }
+inline Print &operator <<(Print &strm, const __WIDTH<T> &arg)
+{ strm << _PAD(arg.width - get_value_width(arg.val), arg.pad) << arg.val; return strm; }
 
 // explicit Operator overload to handle width printing of _FLOAT, double and float
 template<typename T>
-inline Print &pad_float(Print &stm, const __WIDTH<T> &arg, const double val, const int digits = 2) // see Print::print(double, int = 2)
+inline Print &pad_float(Print &strm, const __WIDTH<T> &arg, const double val, const int digits = 2) // see Print::print(double, int = 2)
 {
   PrintBuffer<32> buf; // it's only ~45B on the stack, no allocation, leak or fragmentation
   size_t size = buf.print(val, digits); // print in buf
-  return stm << _PAD(arg.width - size, arg.pad) << buf(); // pad and concat what's in buf
+  return strm << _PAD(arg.width - size, arg.pad) << buf(); // pad and concat what's in buf
 }
 
-inline Print &operator <<(Print &stm, const __WIDTH<float>  &arg)
-{ return pad_float(stm, arg, arg.val); }
+inline Print &operator <<(Print &strm, const __WIDTH<float>  &arg)
+{ return pad_float(strm, arg, arg.val); }
 
-inline Print &operator <<(Print &stm, const __WIDTH<double> &arg)
-{ return pad_float(stm, arg, arg.val); }
+inline Print &operator <<(Print &strm, const __WIDTH<double> &arg)
+{ return pad_float(strm, arg, arg.val); }
 
-inline Print &operator <<(Print &stm, const __WIDTH<_FLOAT> &arg)
-{ auto& f = arg.val; return pad_float(stm, arg, f.val, f.digits); }
+inline Print &operator <<(Print &strm, const __WIDTH<_FLOAT> &arg)
+{ auto& f = arg.val; return pad_float(strm, arg, f.val, f.digits); }
 
 // a less verbose _FLOATW for _WIDTH(_FLOAT)
 #define _FLOATW(val, digits, width) _WIDTH<_FLOAT>(_FLOAT((val), (digits)), (width))
@@ -342,13 +342,13 @@ struct __FMT
 {
   Ft format_string;
   __FMT(Ft f, Ts ... args) : format_string(f) {}
-  inline void tstreamf(Print& stm, Ft format) const
+  inline void tstreamf(Print& strm, Ft format) const
   {
     while(char c = get_next_format_char(format))
     {
       check_backslash(c, format);
       if ( c )
-        stm.print(c);
+        strm.print(c);
     }
   }
 };
@@ -359,7 +359,7 @@ struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
 {
   T val;
   __FMT(Ft f, T t, Ts... ts) : __FMT<Ft, Ts...>(f, ts...), val(t) {}
-  inline void tstreamf(Print& stm, Ft format) const
+  inline void tstreamf(Print& strm, Ft format) const
   {
     while(char c = get_next_format_char(format))
     {
@@ -367,15 +367,15 @@ struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
       {
         if ( c == '%')
         {
-          stm << val;
+          strm << val;
           // Variadic recursion ... compiler rolls this out during
           // template argument pack expansion
-          __FMT<Ft, Ts...>::tstreamf(stm, format);
+          __FMT<Ft, Ts...>::tstreamf(strm, format);
           return;
         }
       }
       if (c)
-        stm.print(c);
+        strm.print(c);
     }
   }
 };
@@ -383,18 +383,18 @@ struct __FMT<Ft, T, Ts...> : __FMT<Ft, Ts...>
 // The actual operator should you only instanciate the FMT
 // helper with a format string and no parameters
 template<typename Ft, typename... Ts>
-inline Print& operator <<(Print &stm, const __FMT<Ft, Ts...> &args)
+inline Print& operator <<(Print &strm, const __FMT<Ft, Ts...> &args)
 {
-    args.tstreamf(stm, args.format_string);
-    return stm;
+    args.tstreamf(strm, args.format_string);
+    return strm;
 }
 
 // The variadic stream helper
 template<typename Ft, typename T, typename... Ts>
-inline Print& operator <<(Print &stm, const __FMT<Ft, T, Ts...> &args)
+inline Print& operator <<(Print &strm, const __FMT<Ft, T, Ts...> &args)
 {
-    args.tstreamf(stm, args.format_string);
-    return stm;
+    args.tstreamf(strm, args.format_string);
+    return strm;
 }
 
 // As we don't have C++17, we can't get a constructor to use
@@ -402,5 +402,14 @@ inline Print& operator <<(Print &stm, const __FMT<Ft, T, Ts...> &args)
 // around that ...
 template<typename Ft, typename... Ts>
 __FMT<Ft, Ts...> _FMT(Ft format, Ts ... args) { return __FMT<Ft, Ts...>(format, args...); }
+
+// make it easier to print multiple variables one after the other using a comma separator
+template<typename T>
+inline Print &operator ,(Print &strm, const T arg)
+{
+  strm.print(" ");
+  strm.print(arg);
+  return strm;
+}
 
 #endif

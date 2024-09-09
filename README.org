@@ -4,7 +4,7 @@
 
 * Library Information
   - Name :: Streaming
-  - Version :: 6.1.1
+  - Version :: 6.2.0
   - License :: GNU LGPL
   - URL :: https://github.com/janelia-arduino/Streaming
   - Authors :: Mikal Hart, gazoodle, victorh800, sebdelsol, Peter Polidoro
@@ -48,6 +48,12 @@ Serial << _FMT(F("To reduce your % size, these % can be in %"), F("sketch"), F("
 Serial << endl;
 
 Serial << "pi to 3 digits = " << _FLOAT(pi,3) << endl;
+
+// comma separator
+int f = 11;
+Serial << "Data: " << 1, 3, 5, 7, 9, f;
+Serial << endl;
+Serial << "comma separator works!" << endl;
 #+END_SRC
 
 ** Caveats
@@ -57,7 +63,6 @@ Serial << "pi to 3 digits = " << _FLOAT(pi,3) << endl;
   and defines them in StreamSend.cpp. If you wish to use this library with the
   esp8266, you may need to comment out those lines in StreamDev.h and
   StreamSend.cpp.
-
 
 * Original Source by Mikal Hart
 

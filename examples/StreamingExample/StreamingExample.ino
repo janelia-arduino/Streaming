@@ -41,5 +41,11 @@ void loop()
 
   Serial << "pi to 3 digits = " << _FLOAT(pi,3) << endl;
 
+  // comma separator
+  int f = 11;
+  Serial << "Data: " << 1, 3, 5, 7, 9, f;
+  Serial << endl;
+  Serial << "comma separator works!" << endl;
+
   delay(LOOP_DELAY);
 }

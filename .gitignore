@@ -40,3 +40,7 @@
 main.cpp
 /.pio
 /.vscode
+.venv
+GPATH
+GRTAGS
+GTAGS
