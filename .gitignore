@@ -39,6 +39,8 @@
 # for platformio on vscode
 main.cpp
 /.pio
+/.platformio
+/.pixi
 /.vscode
 .venv
 GPATH

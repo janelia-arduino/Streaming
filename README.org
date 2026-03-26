@@ -1,23 +1,64 @@
+#+OPTIONS: toc:1 |:t ^:nil tags:nil
 #+TITLE: Streaming
 #+AUTHOR: Mikal Hart
 #+EMAIL: peter@polidoro.io
 
 * Library Information
-  - Name :: Streaming
-  - Version :: 6.2.0
-  - License :: GNU LGPL
-  - URL :: https://github.com/janelia-arduino/Streaming
-  - Authors :: Mikal Hart, gazoodle, victorh800, sebdelsol, Peter Polidoro
-  - Maintainer :: Peter Polidoro
-  - Email :: peter@polidoro.io
+- Name :: Streaming
+- Version :: 6.2.1
+- License :: GNU LGPL 2.1 or later
+- URL :: https://github.com/janelia-arduino/Streaming
+- Authors :: Mikal Hart, gazoodle, victorh800, sebdelsol, Peter Polidoro
+- Maintainer :: Peter Polidoro
+- Email :: peter@polidoro.io
 
 ** Description
 
-   Streaming C++-style Output with Operator <<. Supports _DEC, _BIN, _HEX, _OCT,
-   _FLOAT, _PAD, _WIDTH, _WIDTHZ and _FMT stream helpers. See example code for
-   usage details.
+Header-only Arduino streaming helpers for =Print=-derived outputs such as
+=Serial=. The library adds C++-style =<<= output plus helper wrappers for base
+conversion, padding, width control, float formatting, lightweight format-string
+replacement, and comma-separated values.
 
-** Examples
+See [[./CHANGELOG.md][CHANGELOG.md]] for recent repository and workflow updates.
+
+* Quick Start
+
+#+BEGIN_SRC cpp
+#include <Streaming.h>
+
+void setup()
+{
+  Serial.begin(115200);
+
+  int day = 17;
+  int month = 4;
+  int year = 2009;
+
+  Serial << "The current date is "
+         << _WIDTHZ(day, 2) << "-"
+         << _WIDTHZ(month, 2) << "-"
+         << year << endl;
+}
+#+END_SRC
+
+* Stream Helpers
+
+Available helpers:
+
+- =_DEC(value)=
+- =_BIN(value)=
+- =_HEX(value)=
+- =_OCT(value)=
+- =_BYTE(value)=
+- =_FLOAT(value, digits)=
+- =_PAD(width, fill)=
+- =_WIDTH(value, width)=
+- =_WIDTHZ(value, width)=
+- =_FLOATW(value, digits, width)=
+- =_FMT(format, ...)=
+- =endl=
+
+Representative usage:
 
 #+BEGIN_SRC cpp
 const int lettera = 'A';
@@ -56,7 +97,49 @@ Serial << endl;
 Serial << "comma separator works!" << endl;
 #+END_SRC
 
-** Caveats
+* Examples
+
+- [[./examples/StreamingExample/StreamingExample.ino][examples/StreamingExample/StreamingExample.ino]]
+- [[./examples/StreamingTests/StreamingTests.ino][examples/StreamingTests/StreamingTests.ino]]
+
+* Build and Test
+
+Preferred local workflow with Pixi:
+
+#+BEGIN_SRC sh
+pixi install
+pixi run pio-version
+pixi run test
+pixi run build examples/StreamingExample teensy41
+pixi run build examples/StreamingTests teensy41
+pixi run release-check
+#+END_SRC
+
+Pixi keeps the =pio= CLI and its Python runtime local to the repository. The
+=build=, =upload=, =flash=, and =rebuild= tasks select examples without editing
+=platformio.ini=.
+
+Useful commands:
+
+#+BEGIN_SRC sh
+pixi run ports
+pixi run build examples/StreamingExample uno
+pixi run upload examples/StreamingExample teensy41 /dev/ttyACM0
+pixi run monitor /dev/ttyACM0 115200
+pixi run set-version -- 6.2.0
+#+END_SRC
+
+Equivalent direct commands without Pixi:
+
+#+BEGIN_SRC sh
+make native-test
+python3 tools/version_sync.py check
+python3 tools/pio_task.py build --example examples/StreamingExample --env teensy41
+python3 tools/pio_task.py build --example examples/StreamingTests --env teensy41
+python3 tools/pio_task.py upload --example examples/StreamingExample --env teensy41 --port /dev/ttyACM0
+#+END_SRC
+
+* Caveats
 
 - There may be issues using this library with some STL features.
 - The esp8266 Arduino core declares several "Stream& operator <<" in StreamDev.h
@@ -66,4 +149,4 @@ Serial << "comma separator works!" << endl;
 
 * Original Source by Mikal Hart
 
-  [[http://arduiniana.org/libraries/streaming/]]
+[[http://arduiniana.org/libraries/streaming/]]

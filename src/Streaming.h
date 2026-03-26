@@ -70,7 +70,9 @@ template<typename T>
 #define typeof(x) __typeof__(x)
 #endif
 
-#define STREAMING_MIN(a,b) ((a)<(b)?(a):(b))
+template<typename T>
+inline T streaming_min(const T &a, const T &b)
+{ return (a < b) ? a : b; }
 
 // PrintBuffer implementation of Print, a small buffer to print in
 // see its use with pad_float()
@@ -80,7 +82,7 @@ class PrintBuffer : public Print
   size_t  pos = 0;
   char    str[N] {};
 public:
-  inline const char *operator() ()
+  inline const char *operator() () const
   { return str; };
 
   // inline void clear()
@@ -91,11 +93,12 @@ public:
 
   inline size_t write(const uint8_t *buffer, size_t size)
   {
-    size_t s = STREAMING_MIN(size, N-1 - pos); // need a /0 left
+    size_t s = streaming_min(size, N-1 - pos); // need a /0 left
     if (s)
     {
       memcpy(&str[pos], buffer, s);
       pos += s;
+      str[pos] = '\0';
     }
     return s;
   };
@@ -222,25 +225,70 @@ struct __WIDTH
   __WIDTH(const T& v, int8_t w, char p) : val(v), width(w), pad(p) {}
 };
 
+inline uint8_t digits_from_unsigned(uint64_t v, int8_t base = 10)
+{
+  uint8_t digit_count = 0;
+  do
+  {
+    v /= (uint8_t)base;
+    digit_count++;
+  } while( v > 0 );
+  return digit_count;
+}
+
+inline uint8_t digits(int8_t v, int8_t base = 10)
+{
+  uint8_t digit_count = 0;
+  if ( v < 0 )
+  {
+    digit_count++;
+    uint8_t magnitude = (uint8_t)(-(v + 1)) + 1;
+    return digit_count + digits_from_unsigned(magnitude, base);
+  }
+  return digits_from_unsigned((uint8_t)v, base);
+}
+
+inline uint8_t digits(int16_t v, int8_t base = 10)
+{
+  uint8_t digit_count = 0;
+  if ( v < 0 )
+  {
+    digit_count++;
+    uint16_t magnitude = (uint16_t)(-(v + 1)) + 1;
+    return digit_count + digits_from_unsigned(magnitude, base);
+  }
+  return digits_from_unsigned((uint16_t)v, base);
+}
+
+inline uint8_t digits(int32_t v, int8_t base = 10)
+{
+  uint8_t digit_count = 0;
+  if ( v < 0 )
+  {
+    digit_count++;
+    uint32_t magnitude = (uint32_t)(-(v + 1)) + 1;
+    return digit_count + digits_from_unsigned(magnitude, base);
+  }
+  return digits_from_unsigned((uint32_t)v, base);
+}
+
+inline uint8_t digits(int64_t v, int8_t base = 10)
+{
+  uint8_t digit_count = 0;
+  if ( v < 0 )
+  {
+    digit_count++;
+    uint64_t magnitude = (uint64_t)(-(v + 1)) + 1;
+    return digit_count + digits_from_unsigned(magnitude, base);
+  }
+  return digits_from_unsigned((uint64_t)v, base);
+}
+
 //  Count digits in an integer of specific base
 template<typename T>
 inline uint8_t digits(T v, int8_t base = 10)
 {
-  uint8_t digits = 0;
-  if ( streaming_std::is_signed<T>::value )
-  {
-    if ( v < 0 )
-    {
-      digits++;
-      v = -v; // v needs to be postive for the digits counter to work
-    }
-  }
-  do
-  {
-    v /= base;
-    digits++;
-  } while( v > 0 );
-  return digits;
+  return digits_from_unsigned(v, base);
 }
 
 // Generic get the width of a value in base 10
@@ -258,7 +306,7 @@ inline uint8_t get_value_width(const __FlashStringHelper * val)
 
 // _BASED<T> get the width of a value
 template<typename T>
-inline uint8_t get_value_width(_BASED<T> b)
+inline uint8_t get_value_width(const _BASED<T> &b)
 { return digits(b.val, b.base); }
 
 // Constructor wrapper to allow automatic template parameter deduction
@@ -405,7 +453,7 @@ __FMT<Ft, Ts...> _FMT(Ft format, Ts ... args) { return __FMT<Ft, Ts...>(format, 
 
 // make it easier to print multiple variables one after the other using a comma separator
 template<typename T>
-inline Print &operator ,(Print &strm, const T arg)
+inline Print &operator ,(Print &strm, const T &arg)
 {
   strm.print(" ");
   strm.print(arg);
