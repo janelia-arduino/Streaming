@@ -67,10 +67,19 @@ public:
 private:
   NoCopyConstructorType(NoCopyConstructorType &) = delete;
 };
+
+template<typename T>
+void width_expression_compiles(const T &value)
+{
+  (void)_WIDTH(value, 4);
+}
 }
 
 int main()
 {
+  width_expression_compiles((int32_t)0);
+  width_expression_compiles(_FLOAT(0.0, 2));
+
   AssertPrint out;
   const char abc[] = "abc";
   double v = 1.23456789012345;

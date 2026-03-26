@@ -3,9 +3,12 @@
 #+AUTHOR: Mikal Hart
 #+EMAIL: peter@polidoro.io
 
+[[https://github.com/janelia-arduino/Streaming/actions/workflows/native-test.yml][https://github.com/janelia-arduino/Streaming/actions/workflows/native-test.yml/badge.svg]]
+[[https://img.shields.io/badge/license-LGPL%202.1%2B-blue.svg][https://img.shields.io/badge/license-LGPL%202.1%2B-blue.svg]]
+
 * Library Information
 - Name :: Streaming
-- Version :: 6.2.1
+- Version :: 6.2.2
 - License :: GNU LGPL 2.1 or later
 - URL :: https://github.com/janelia-arduino/Streaming
 - Authors :: Mikal Hart, gazoodle, victorh800, sebdelsol, Peter Polidoro
@@ -101,6 +104,7 @@ Serial << "comma separator works!" << endl;
 
 - [[./examples/StreamingExample/StreamingExample.ino][examples/StreamingExample/StreamingExample.ino]]
 - [[./examples/StreamingTests/StreamingTests.ino][examples/StreamingTests/StreamingTests.ino]]
+- [[./examples/FormattingHelpers/FormattingHelpers.ino][examples/FormattingHelpers/FormattingHelpers.ino]]
 
 * Build and Test
 
@@ -112,6 +116,7 @@ pixi run pio-version
 pixi run test
 pixi run build examples/StreamingExample teensy41
 pixi run build examples/StreamingTests teensy41
+pixi run build examples/FormattingHelpers teensy41
 pixi run release-check
 #+END_SRC
 
@@ -124,9 +129,10 @@ Useful commands:
 #+BEGIN_SRC sh
 pixi run ports
 pixi run build examples/StreamingExample uno
+pixi run build examples/FormattingHelpers teensy41
 pixi run upload examples/StreamingExample teensy41 /dev/ttyACM0
 pixi run monitor /dev/ttyACM0 115200
-pixi run set-version -- 6.2.0
+pixi run set-version -- 6.2.2
 #+END_SRC
 
 Equivalent direct commands without Pixi:
@@ -136,8 +142,19 @@ make native-test
 python3 tools/version_sync.py check
 python3 tools/pio_task.py build --example examples/StreamingExample --env teensy41
 python3 tools/pio_task.py build --example examples/StreamingTests --env teensy41
+python3 tools/pio_task.py build --example examples/FormattingHelpers --env teensy41
 python3 tools/pio_task.py upload --example examples/StreamingExample --env teensy41 --port /dev/ttyACM0
 #+END_SRC
+
+* Release Checklist
+
+Before tagging a release:
+
+- Update =CHANGELOG.md=.
+- Sync version metadata with =python3 tools/version_sync.py set X.Y.Z=.
+- Run =make native-test=.
+- Run =pixi run release-check=.
+- Commit, tag, and push the release.
 
 * Caveats
 

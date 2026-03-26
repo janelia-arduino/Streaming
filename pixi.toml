@@ -1,6 +1,6 @@
 [workspace]
 name = "Streaming"
-version = "6.2.1"
+version = "6.2.2"
 description = "Arduino streaming helpers that add C++-style operator << output."
 authors = ["Peter Polidoro <peter@polidoro.io>"]
 channels = ["conda-forge"]

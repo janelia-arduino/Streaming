@@ -1,12 +1,14 @@
 # Changelog
 
-## 6.2.1
+## 6.2.2
 
 - Add a native host test target so core formatting behavior can be checked without hardware.
 - Add Pixi-managed PlatformIO and release-check tooling for repeatable local builds.
 - Refresh README and package metadata to document current examples and workflows.
 - Fix `_WIDTH` digit counting for minimum signed integer values.
 - Avoid by-value copies in the comma streaming operator.
+- Add a dedicated formatting helper example for `_FMT`, `_WIDTHZ`, and `_FLOATW`.
+- Add GitHub Actions coverage for the native host test target.
 
 ## 6.2.0
 
