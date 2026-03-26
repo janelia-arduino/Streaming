@@ -8,7 +8,7 @@
 
 * Library Information
 - Name :: Streaming
-- Version :: 6.2.2
+- Version :: 6.2.3
 - License :: GNU LGPL 2.1 or later
 - URL :: https://github.com/janelia-arduino/Streaming
 - Authors :: Mikal Hart, gazoodle, victorh800, sebdelsol, Peter Polidoro
@@ -113,6 +113,7 @@ Preferred local workflow with Pixi:
 #+BEGIN_SRC sh
 pixi install
 pixi run pio-version
+pixi run check-format
 pixi run test
 pixi run build examples/StreamingExample teensy41
 pixi run build examples/StreamingTests teensy41
@@ -128,17 +129,19 @@ Useful commands:
 
 #+BEGIN_SRC sh
 pixi run ports
+pixi run format
 pixi run build examples/StreamingExample uno
 pixi run build examples/FormattingHelpers teensy41
 pixi run upload examples/StreamingExample teensy41 /dev/ttyACM0
 pixi run monitor /dev/ttyACM0 115200
-pixi run set-version -- 6.2.2
+pixi run set-version -- 6.2.3
 #+END_SRC
 
 Equivalent direct commands without Pixi:
 
 #+BEGIN_SRC sh
 make native-test
+python3 tools/clang_format.py check
 python3 tools/version_sync.py check
 python3 tools/pio_task.py build --example examples/StreamingExample --env teensy41
 python3 tools/pio_task.py build --example examples/StreamingTests --env teensy41
@@ -152,6 +155,7 @@ Before tagging a release:
 
 - Update =CHANGELOG.md=.
 - Sync version metadata with =python3 tools/version_sync.py set X.Y.Z=.
+- Run =pixi run check-format=.
 - Run =make native-test=.
 - Run =pixi run release-check=.
 - Commit, tag, and push the release.

@@ -5,78 +5,64 @@
 
 #include <Streaming.h>
 
-namespace
-{
-class AssertPrint : public Print
-{
+namespace {
+class AssertPrint : public Print {
 public:
-  size_t write(uint8_t b) override
-  {
+  size_t write(uint8_t b) override {
     buffer_.push_back(static_cast<char>(b));
     return 1;
   }
 
-  void reset()
-  {
+  void reset() {
     buffer_.clear();
   }
 
-  const std::string &buffer() const
-  {
+  const std::string& buffer() const {
     return buffer_;
   }
 
-  void expect(const char *expected)
-  {
-    if (buffer_ != expected)
-    {
-      fprintf(stderr, "Expected [%s] but got [%s]\n", expected, buffer_.c_str());
+  void expect(const char* expected) {
+    if (buffer_ != expected) {
+      fprintf(
+        stderr, "Expected [%s] but got [%s]\n", expected, buffer_.c_str());
     }
     assert(buffer_ == expected);
     reset();
   }
 
-  void expect(const __FlashStringHelper *expected)
-  {
-    expect(reinterpret_cast<const char *>(expected));
+  void expect(const __FlashStringHelper* expected) {
+    expect(reinterpret_cast<const char*>(expected));
   }
 
 private:
   std::string buffer_;
 };
 
-class PrintableTest : public Printable
-{
+class PrintableTest : public Printable {
 public:
-  size_t printTo(Print &p) const override
-  {
+  size_t printTo(Print& p) const override {
     return p.print("printed");
   }
 };
 
-class NoCopyConstructorType : public Printable
-{
+class NoCopyConstructorType : public Printable {
 public:
   NoCopyConstructorType() = default;
 
-  size_t printTo(Print &p) const override
-  {
+  size_t printTo(Print& p) const override {
     return p.print("NoCopyCtr");
   }
 
 private:
-  NoCopyConstructorType(NoCopyConstructorType &) = delete;
+  NoCopyConstructorType(NoCopyConstructorType&) = delete;
 };
 
-template<typename T>
-void width_expression_compiles(const T &value)
-{
+template <typename T> void width_expression_compiles(const T& value) {
   (void)_WIDTH(value, 4);
 }
 }
 
-int main()
-{
+int main() {
   width_expression_compiles((int32_t)0);
   width_expression_compiles(_FLOAT(0.0, 2));
 
@@ -217,7 +203,11 @@ int main()
   out << _FLOATW(1.e10, 2, 11);
   out.expect("        ovf");
 
-  out << _FMT("Hello % the time is %:%:%", "gazoodle", _WIDTHZ(1, 2), _WIDTHZ(4, 2), _WIDTHZ(8, 2));
+  out << _FMT("Hello % the time is %:%:%",
+              "gazoodle",
+              _WIDTHZ(1, 2),
+              _WIDTHZ(4, 2),
+              _WIDTHZ(8, 2));
   out.expect("Hello gazoodle the time is 01:04:08");
   out << _FMT("Too many % % % for the parms", 1);
   out.expect("Too many 1 % % for the parms");
@@ -234,21 +224,14 @@ int main()
   out << _FMT("Once % a %%%", F("upon"), 't', 1, "me");
   out.expect("Once upon a t1me");
 
-  out
-    << (int8_t)1
-    << _BYTE(50)
-    << _HEX(3)
-    << _FLOAT(4, 0)
-    << _PAD(1, '5')
-    << _WIDTH(6, 1)
-    << _FMT("%", 7)
-    << endl;
+  out << (int8_t)1 << _BYTE(50) << _HEX(3) << _FLOAT(4, 0) << _PAD(1, '5')
+      << _WIDTH(6, 1) << _FMT("%", 7) << endl;
   out.expect("1234567\r\n");
 
   out << NoCopyConstructorType();
   out.expect("NoCopyCtr");
 
-  out << "Value:" , NoCopyConstructorType();
+  out << "Value:", NoCopyConstructorType();
   out.expect("Value: NoCopyCtr");
 
   out << "Data:" << 1, 3, 5, 7, 9;

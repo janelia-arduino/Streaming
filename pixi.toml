@@ -1,6 +1,6 @@
 [workspace]
 name = "Streaming"
-version = "6.2.2"
+version = "6.2.3"
 description = "Arduino streaming helpers that add C++-style operator << output."
 authors = ["Peter Polidoro <peter@polidoro.io>"]
 channels = ["conda-forge"]
@@ -10,11 +10,14 @@ platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 platformio = ">=6.1.19,<7"
 python = ">=3.12,<=3.14"
 git = "*"
+clang-format = ">=18,<21"
 
 [tasks]
 ports = "pio device list"
 pio-version = "pio --version"
 test = "make native-test"
+format = "python tools/clang_format.py format"
+check-format = "python tools/clang_format.py check"
 check-version = "python tools/version_sync.py check"
 release-check = "python tools/release_check.py"
 
