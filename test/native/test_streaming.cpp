@@ -13,25 +13,21 @@ public:
     return 1;
   }
 
-  void reset() {
-    buffer_.clear();
-  }
+  void reset() { buffer_.clear(); }
 
-  const std::string& buffer() const {
-    return buffer_;
-  }
+  const std::string &buffer() const { return buffer_; }
 
-  void expect(const char* expected) {
+  void expect(const char *expected) {
     if (buffer_ != expected) {
-      fprintf(
-        stderr, "Expected [%s] but got [%s]\n", expected, buffer_.c_str());
+      fprintf(stderr, "Expected [%s] but got [%s]\n", expected,
+              buffer_.c_str());
     }
     assert(buffer_ == expected);
     reset();
   }
 
-  void expect(const __FlashStringHelper* expected) {
-    expect(reinterpret_cast<const char*>(expected));
+  void expect(const __FlashStringHelper *expected) {
+    expect(reinterpret_cast<const char *>(expected));
   }
 
 private:
@@ -40,27 +36,23 @@ private:
 
 class PrintableTest : public Printable {
 public:
-  size_t printTo(Print& p) const override {
-    return p.print("printed");
-  }
+  size_t printTo(Print &p) const override { return p.print("printed"); }
 };
 
 class NoCopyConstructorType : public Printable {
 public:
   NoCopyConstructorType() = default;
 
-  size_t printTo(Print& p) const override {
-    return p.print("NoCopyCtr");
-  }
+  size_t printTo(Print &p) const override { return p.print("NoCopyCtr"); }
 
 private:
-  NoCopyConstructorType(NoCopyConstructorType&) = delete;
+  NoCopyConstructorType(NoCopyConstructorType &) = delete;
 };
 
-template <typename T> void width_expression_compiles(const T& value) {
+template <typename T> void width_expression_compiles(const T &value) {
   (void)_WIDTH(value, 4);
 }
-}
+} // namespace
 
 int main() {
   width_expression_compiles((int32_t)0);
@@ -203,11 +195,8 @@ int main() {
   out << _FLOATW(1.e10, 2, 11);
   out.expect("        ovf");
 
-  out << _FMT("Hello % the time is %:%:%",
-              "gazoodle",
-              _WIDTHZ(1, 2),
-              _WIDTHZ(4, 2),
-              _WIDTHZ(8, 2));
+  out << _FMT("Hello % the time is %:%:%", "gazoodle", _WIDTHZ(1, 2),
+              _WIDTHZ(4, 2), _WIDTHZ(8, 2));
   out.expect("Hello gazoodle the time is 01:04:08");
   out << _FMT("Too many % % % for the parms", 1);
   out.expect("Too many 1 % % for the parms");

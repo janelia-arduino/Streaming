@@ -9,9 +9,7 @@ const float pi = 3.14159;
 
 const long LOOP_DELAY = 1000;
 
-void setup() {
-  Serial.begin(BAUD);
-}
+void setup() { Serial.begin(BAUD); }
 
 void loop() {
   Serial << "This is an example of the new streaming" << endl;
@@ -32,17 +30,11 @@ void loop() {
   Serial << "Width specification [" << _WIDTH(10, 5) << "]" << endl;
   Serial << "Leading zeros [" << _WIDTHZ(month, 2) << "]" << endl;
   Serial << _FMT("Format strings for stuff like dates and times %/%/% %:%:%",
-                 _WIDTHZ(day, 2),
-                 _WIDTHZ(month, 2),
-                 year,
-                 _WIDTHZ(hour, 2),
-                 _WIDTHZ(minute, 2),
-                 _WIDTHZ(second, 2))
+                 _WIDTHZ(day, 2), _WIDTHZ(month, 2), year, _WIDTHZ(hour, 2),
+                 _WIDTHZ(minute, 2), _WIDTHZ(second, 2))
          << endl;
-  Serial << _FMT(F("To reduce your % size, these % can be in %"),
-                 F("sketch"),
-                 F("constants"),
-                 F("PROGMEM"))
+  Serial << _FMT(F("To reduce your % size, these % can be in %"), F("sketch"),
+                 F("constants"), F("PROGMEM"))
          << endl;
   Serial << endl;
 

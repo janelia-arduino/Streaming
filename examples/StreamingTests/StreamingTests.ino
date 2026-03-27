@@ -3,29 +3,26 @@
 // Unit test helper class
 class _Assert : public Print {
 public:
-  _Assert()
-      : m_idx(0) {}
+  _Assert() : m_idx(0) {}
   size_t write(uint8_t b) {
     m_buf[m_idx++] = b;
     return 1;
   }
-  int8_t compare(const char* expected) const {
+  int8_t compare(const char *expected) const {
     int8_t len_comparison = strlen(expected) - m_idx;
     if (len_comparison != 0)
       return len_comparison;
     return memcmp(m_buf, expected, m_idx);
   }
-  int8_t compare(const __FlashStringHelper* expected) const {
+  int8_t compare(const __FlashStringHelper *expected) const {
     int8_t len_comparison =
-      strlen_P(reinterpret_cast<const char*>(expected)) - m_idx;
+        strlen_P(reinterpret_cast<const char *>(expected)) - m_idx;
     if (len_comparison != 0)
       return len_comparison;
     return memcmp_P(m_buf, expected, m_idx);
   }
-  void reset(void) {
-    m_idx = 0;
-  }
-  const char* buffer(void) {
+  void reset(void) { m_idx = 0; }
+  const char *buffer(void) {
     m_buf[m_idx] = 0;
     return m_buf;
   }
@@ -39,11 +36,12 @@ _Assert Assert;
 uint16_t ran = 0;
 uint16_t passed = 0;
 
-template <typename T> inline Print& operator==(Print& stm, T expected) {
+template <typename T> inline Print &operator==(Print &stm, T expected) {
   // Hackery since we know stm is of type _Assert
-  _Assert* assert = reinterpret_cast<_Assert*>(&stm);
+  _Assert *assert = reinterpret_cast<_Assert *>(&stm);
   int8_t cmp = assert->compare(expected);
-  // Would love to use the streaming functions here, but as we're testing them we can't
+  // Would love to use the streaming functions here, but as we're testing them
+  // we can't
   Serial.print("Test ");
   Serial.print(++ran);
   if (cmp == 0) {
@@ -61,26 +59,21 @@ template <typename T> inline Print& operator==(Print& stm, T expected) {
 }
 
 class PrintableTest : public Printable {
-  size_t printTo(Print& p) const {
-    return p.print("printed");
-  }
+  size_t printTo(Print &p) const { return p.print("printed"); }
 };
 
 class NoCopyConstructorType : public Printable {
 public:
   NoCopyConstructorType() {}
-  size_t printTo(Print& p) const {
-    return p.print("NoCopyCtr");
-  }
+  size_t printTo(Print &p) const { return p.print("NoCopyCtr"); }
 
 private:
-  // Remove the copy constructor which will ensure that it can't be passed to the streaming template by value
-  NoCopyConstructorType(NoCopyConstructorType&) {}
+  // Remove the copy constructor which will ensure that it can't be passed to
+  // the streaming template by value
+  NoCopyConstructorType(NoCopyConstructorType &) {}
 };
 
-void setup() {
-  Serial.begin(115200);
-}
+void setup() { Serial.begin(115200); }
 
 void loop() {
   ran = passed = 0;
@@ -207,7 +200,8 @@ void loop() {
 
   Assert << _WIDTH(_FLOAT(-9.99, 1), 11) == F("      -10.0");
   Assert << _WIDTH(-3.14159, 11) ==
-    F("      -3.14"); // default nb of digits after decimal point is 2 for print(double)
+      F("      -3.14"); // default nb of digits after decimal point is 2 for
+                        // print(double)
   Assert << _WIDTH((float)12.566, 11) == F("      12.57");
 
   Assert << _FLOATW(-1, 2, 11) == F("      -1.00");
@@ -232,25 +226,22 @@ void loop() {
   //  Stream formatter
   //
 
-  Assert << _FMT("Hello % the time is %:%:%",
-                 "gazoodle",
-                 _WIDTHZ(1, 2),
-                 _WIDTHZ(4, 2),
-                 _WIDTHZ(8, 2)) ==
-    F("Hello gazoodle the time is 01:04:08");
+  Assert << _FMT("Hello % the time is %:%:%", "gazoodle", _WIDTHZ(1, 2),
+                 _WIDTHZ(4, 2), _WIDTHZ(8, 2)) ==
+      F("Hello gazoodle the time is 01:04:08");
   Assert << _FMT("Too many % % % for the parms", 1) ==
-    F("Too many 1 % % for the parms");
+      F("Too many 1 % % for the parms");
   Assert << _FMT("Too few % for the parms", 1, 2) ==
-    F("Too few 1 for the parms");
+      F("Too few 1 for the parms");
   Assert << _FMT("Output a \\% sign") == F("Output a % sign");
   Assert << _FMT("Handle trailing \\") == F("Handle trailing ");
   Assert << _FMT(F("Replace % with %"), 1, 2) == F("Replace 1 with 2");
   Assert << _FMT("Your score is %\\%", 65.3) == F("Your score is 65.30%");
   Assert << _FMT("Once % a %%%", F("upon"), 't', 1, "me") ==
-    F("Once upon a t1me");
-  Assert << _FMT(
-    "This [%][%][%] grid", _WIDTH(10, 4), _WIDTH(_HEX(619), 4), _WIDTH(3, 4)) ==
-    F("This [  10][ 26B][   3] grid");
+      F("Once upon a t1me");
+  Assert << _FMT("This [%][%][%] grid", _WIDTH(10, 4), _WIDTH(_HEX(619), 4),
+                 _WIDTH(3, 4)) ==
+      F("This [  10][ 26B][   3] grid");
 
   //
   //  Make sure that all the stream operators return the stream
@@ -266,7 +257,7 @@ void loop() {
          << _FMT("%", 7) // Formatter
          << endl
 
-    == F("1234567\r\n");
+      == F("1234567\r\n");
 
   //
   // Ensure streaming template overide doesn't pass by value
