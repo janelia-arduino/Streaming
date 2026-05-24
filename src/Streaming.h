@@ -153,6 +153,20 @@ inline Print &operator<<(Print &obj, const _BASED<T> &arg) {
   return obj;
 }
 
+// Specialization for parts of char arrays or char arrays without null termination
+
+struct _BUFPART {
+  const uint8_t *buffer;
+  size_t length = 0;
+  _BUFPART(const uint8_t *b, size_t l) : buffer(b), length(l) {}
+  _BUFPART(const char *b, size_t l) : buffer((uint8_t *)b), length(l) {}
+};
+
+inline Print &operator<<(Print &obj, const _BUFPART &arg) {
+  obj.write(arg.buffer, arg.length);
+  return obj;
+}
+
 #if ARDUINO >= 18
 // Specialization for class _FLOAT
 // Thanks to Michael Margolis for suggesting a way
