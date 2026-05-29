@@ -137,10 +137,18 @@ inline Print &operator<<(Print &obj, const _BYTE_CODE &arg) {
 
 #endif
 
-#define _HEX(a) _BASED<typeof(a)>(a, HEX)
-#define _DEC(a) _BASED<typeof(a)>(a, DEC)
-#define _OCT(a) _BASED<typeof(a)>(a, OCT)
-#define _BIN(a) _BASED<typeof(a)>(a, BIN)
+#define _HEX(a)   _BASED<typeof(a)>(a, HEX)
+#define _HEX2(a)  _BASED<typeof(a)>(a, HEX2)
+#define _HEX4(a)  _BASED<typeof(a)>(a, HEX4)
+#define _HEX8(a)  _BASED<typeof(a)>(a, HEX8)
+#define _DEC(a)   _BASED<typeof(a)>(a, DEC)
+#define _OCT(a)   _BASED<typeof(a)>(a, OCT)
+#define _BIN(a)   _BASED<typeof(a)>(a, BIN)
+#define _BIN2(a)  _BASED<typeof(a)>(a, BIN2)
+#define _BIN4(a)  _BASED<typeof(a)>(a, BIN4)
+#define _BIN8(a)  _BASED<typeof(a)>(a, BIN8)
+#define _BIN16(a) _BASED<typeof(a)>(a, BIN16)
+#define _BIN32(a) _BASED<typeof(a)>(a, BIN32)
 
 // Specialization for class _BASED
 // Thanks to Arduino forum user Ben Combee who suggested this
